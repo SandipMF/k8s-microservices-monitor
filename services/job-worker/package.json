@@ -1,0 +1,15 @@
+{
+  "name": "job-worker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "express": "^4.18.2",
+    "prom-client": "^14.2.0",
+    "bcrypt": "^5.1.0"
+  }
+}
