@@ -14,6 +14,7 @@ const connection = {
 
 const jobQueue = new Queue("jobs", { connection });
 
+// Submit job endpoint
 router.post("/submit", async (req: Request, res: Response): Promise<void> => {
   try {
     // Generate unique job ID

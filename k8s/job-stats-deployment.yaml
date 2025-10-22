@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-stats
+  namespace: microservices-monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: job-stats
+  template:
+    metadata:
+      labels:
+        app: job-stats
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3002"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: job-stats
+        image: your-dockerhub-username/job-stats:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3002
+        env:
+        - name: PORT
+          value: "3002"
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb-service:27017/jobs_db"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-stats
+  namespace: microservices-monitoring
+  labels:
+    app: job-stats
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3002
+    targetPort: 3002
+    name: metrics
+  selector:
+    app: job-stats
