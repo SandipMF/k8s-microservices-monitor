@@ -4,7 +4,7 @@ metadata:
   name: job-submitter
   namespace: microservices-monitoring
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: job-submitter
@@ -14,27 +14,27 @@ spec:
         app: job-submitter
     spec:
       containers:
-      - name: job-submitter
-        image: your-dockerhub-username/job-submitter:latest
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3000
-        env:
-        - name: PORT
-          value: "3000"
-        - name: REDIS_HOST
-          value: "redis-service"
-        - name: REDIS_PORT
-          value: "6379"
-        - name: MONGODB_URI
-          value: "mongodb://mongodb-service:27017/jobs_db"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: job-submitter
+          image: sandipsamanta/job-submitter:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: MONGODB_URI
+              value: "mongodb://mongodb-service:27017/jobs_db"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "300m"
 ---
 apiVersion: v1
 kind: Service
@@ -44,7 +44,7 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 80
-    targetPort: 3000
+    - port: 80
+      targetPort: 3000
   selector:
     app: job-submitter
