@@ -70,11 +70,11 @@ const worker = new Worker<JobData>(
 
 // Worker event handlers
 worker.on("completed", (job: BullJob) => {
-  console.log(`✓ Job ${job.id} completed successfully`);
+  console.log(`Job ${job.id} completed successfully`);
 });
 
 worker.on("failed", (job: BullJob | undefined, err: Error) => {
-  console.error(`✗ Job ${job?.id} failed:`, err.message);
+  console.error(`Job ${job?.id} failed:`, err.message);
 });
 
 worker.on("error", (err: Error) => {
