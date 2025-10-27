@@ -1,12 +1,13 @@
 import { Queue } from "bullmq";
 import { Router, Request, Response } from "express";
 import { Job } from "../models/Job.model";
+import { REDIS_HOST, REDIS_PORT } from "../config/env.config";
 
 const router = Router();
 
 const connection = {
-  host: process.env.REDIS_HOST || "redis-service",
-  port: parseInt(process.env.REDIS_PORT || "6379"),
+  host: REDIS_HOST,
+  port: REDIS_PORT,
   maxRetriesPerRequest: null,
 };
 

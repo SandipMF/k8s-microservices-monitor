@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://mongodb-service:27017/jobs_db"; //"mongodb://localhost:27017/jobdb";
+import { MONGODB_URI } from "./env.config";
 
 export const connectDatabase = async (): Promise<void> => {
   try {

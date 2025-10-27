@@ -1,7 +1,5 @@
 import mongoose from 'mongoose';
-
-// MongoDB connection URI from environment variables or default
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://mongodb-service:27017/jobs_db';
+import { MONGODB_URI } from './env.config';
 
 // Function to connect to MongoDB
 export const connectDatabase = async (): Promise<void> => {

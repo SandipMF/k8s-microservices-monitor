@@ -3,14 +3,14 @@ import express, { Application, Request, Response } from "express";
 import { Counter, Histogram, register } from "prom-client";
 import { JobData, processJob } from "./processors/job.processor";
 import { connectDatabase } from "./config/database";
+import { PORT, REDIS_HOST, REDIS_PORT } from "./config/env.config";
 
 const app: Application = express();
-const PORT = process.env.PORT || 3001;
 
 // Redis connection
 const connection = {
-  host: process.env.REDIS_HOST || "redis-service",
-  port: parseInt(process.env.REDIS_PORT || "6379"),
+  host: REDIS_HOST,
+  port: REDIS_PORT,
   maxRetriesPerRequest: null,
 };
 

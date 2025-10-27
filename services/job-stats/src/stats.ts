@@ -4,16 +4,13 @@ import { Gauge, register } from "prom-client";
 import { Job } from "./models/Job.model";
 import statsRoutes from "./routes/stats.routes";
 import { connectDatabase } from "./config/database";
+import { PORT, REDIS_HOST, REDIS_PORT } from "./config/env.config";
 
 const app: Application = express();
-const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
 
 // Redis connection setup
-const REDIS_HOST = process.env.REDIS_HOST || "redis-service";
-const REDIS_PORT = parseInt(process.env.REDIS_PORT || "6379");
-
 const connection = {
   host: REDIS_HOST,
   port: REDIS_PORT,
