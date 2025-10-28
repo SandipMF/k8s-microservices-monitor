@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import express, { Application, Request, Response } from "express";
 import { Gauge, register } from "prom-client";
-import { Job } from "@microservices/shared-database";
+import { jobRepository } from "@microservices/shared-database";
 import statsRoutes from "./routes/stats.routes";
 import { connectDatabase } from "./config/database";
 import { PORT, REDIS_HOST, REDIS_PORT } from "./config/env.config";
@@ -53,10 +53,11 @@ const updateMetrics = async () => {
       jobQueue.getActiveCount(),
     ]);
 
+    // Use repository for count operations
     const [total, completed, failed] = await Promise.all([
-      Job.countDocuments(),
-      Job.countDocuments({ status: "completed" }),
-      Job.countDocuments({ status: "failed" }),
+      jobRepository.count(),
+      jobRepository.countByStatus("completed"),
+      jobRepository.countByStatus("failed"),
     ]);
 
     totalJobsSubmitted.set(total);

@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import { Job as BullJob } from "bullmq";
-import { Job } from "@microservices/shared-database";
+import { jobRepository, JobType } from "@microservices/shared-database";
 
 export interface JobData {
   jobId: string;
-  type: "prime" | "bcrypt" | "sort";
+  type: JobType;
   timeStamp: number;
 }
 
@@ -49,14 +49,14 @@ function generateAndSortArray(size: number): number[] {
   return arr.sort((a, b) => a - b);
 }
 
-//
+// Process the job
 export async function processJob(job: BullJob<JobData>): Promise<JobResult> {
   const startTime = Date.now();
   const { jobId, type } = job.data;
 
   try {
-    // Update job status to processing
-    await Job.findOneAndUpdate({ jobId }, { status: "processing" });
+    // Update job status to processing using repository
+    await jobRepository.updateStatus(jobId, "processing");
 
     let result: JobResult;
 
@@ -80,31 +80,17 @@ export async function processJob(job: BullJob<JobData>): Promise<JobResult> {
 
     const processingTime = (Date.now() - startTime) / 1000; // in seconds
 
-    // Update job in MongoDB with results
-    await Job.findOneAndUpdate(
-      { jobId },
-      {
-        status: "completed",
-        result,
-        processingTime,
-        completedAt: new Date(),
-      }
-    );
+    // Update job in MongoDB with results using repository
+    await jobRepository.updateWithResult(jobId, result, processingTime);
 
     console.log(`Job ${jobId} completed in ${processingTime.toFixed(2)}s`);
 
     return result;
   } catch (error: any) {
-    console.error(`✗ Job ${jobId} failed:`, error);
+    console.error(`Job ${jobId} failed:`, error);
 
-    await Job.findOneAndUpdate(
-      { jobId },
-      {
-        status: "failed",
-        error: error.message,
-        completedAt: new Date(),
-      }
-    );
+    // Update job status to failed using repository
+    await jobRepository.updateWithResult(jobId, null, 0, error.message);
 
     throw error;
   }

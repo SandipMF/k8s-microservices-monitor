@@ -1,10 +1,11 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
+import { JobType, JobStatus, JOB_TYPES, JOB_STATUSES } from "../types/job.types";
 
 // Job interface
 export interface IJob extends Document {
   jobId: string;
-  type: "prime" | "bcrypt" | "sort";
-  status: "queued" | "processing" | "completed" | "failed";
+  type: JobType;
+  status: JobStatus;
   result?: any;
   processingTime?: number;
   error?: string;
@@ -24,12 +25,12 @@ const JobSchema = new Schema<IJob>(
     },
     type: {
       type: String,
-      enum: ["prime", "bcrypt", "sort"],
+      enum: JOB_TYPES,
       required: true,
     },
     status: {
       type: String,
-      enum: ["queued", "processing", "completed", "failed"],
+      enum: JOB_STATUSES,
       default: "queued",
       index: true,
     },

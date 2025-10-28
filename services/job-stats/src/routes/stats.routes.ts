@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
 import { Router, Request, Response } from "express";
-import { Job } from "@microservices/shared-database";
+import { jobRepository } from "@microservices/shared-database";
 import { REDIS_HOST, REDIS_PORT } from "../config/env.config";
 
 const router = Router();
@@ -24,50 +24,21 @@ router.get("/stats", async (_req: Request, res: Response): Promise<void> => {
       jobQueue.getFailedCount(),
     ]);
 
-    // Database stats
+    // Database stats using repository
     const [totalJobs, completedJobs, failedJobs, processingJobs, queuedJobs] =
       await Promise.all([
-        Job.countDocuments(),
-        Job.countDocuments({ status: "completed" }),
-        Job.countDocuments({ status: "failed" }),
-        Job.countDocuments({ status: "processing" }),
-        Job.countDocuments({ status: "queued" }),
+        jobRepository.count(),
+        jobRepository.countByStatus("completed"),
+        jobRepository.countByStatus("failed"),
+        jobRepository.countByStatus("processing"),
+        jobRepository.countByStatus("queued"),
       ]);
 
-    // Average processing time
-    const avgTimeResult = await Job.aggregate([
-      { $match: { status: "completed", processingTime: { $exists: true } } },
-      { $group: { _id: null, avgTime: { $avg: "$processingTime" } } },
-    ]);
+    // Average processing time using repository
+    const avgProcessingTime = await jobRepository.getAverageProcessingTime();
 
-    // If no completed jobs, avgTimeResult will be empty
-    const avgProcessingTime =
-      avgTimeResult.length > 0 ? avgTimeResult[0].avgTime : 0;
-
-    // Stats by job type
-    const statsByType = await Job.aggregate([
-      {
-        $group: {
-          _id: "$type",
-          total: { $sum: 1 },
-          completed: {
-            $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
-          },
-          failed: {
-            $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] },
-          },
-          avgTime: {
-            $avg: {
-              $cond: [
-                { $eq: ["$status", "completed"] },
-                "$processingTime",
-                null,
-              ],
-            },
-          },
-        },
-      },
-    ]);
+    // Stats by job type using repository
+    const statsByType = await jobRepository.aggregateByTypeAndStatus();
 
     // Construct response
     res.json({
@@ -104,21 +75,7 @@ router.get(
   "/analytics",
   async (_req: Request, res: Response): Promise<void> => {
     try {
-      const analytics = await Job.aggregate([
-        {
-          $group: {
-            _id: {
-              type: "$type",
-              status: "$status",
-            },
-            count: { $sum: 1 },
-            avgTime: { $avg: "$processingTime" },
-            maxTime: { $avg: "$processingTime" },
-            minTime: { $avg: "$processingTime" },
-          },
-        },
-        { $sort: { "_id.type": 1, "_id.status": 1 } },
-      ]);
+      const analytics = await jobRepository.aggregateByTypeAndStatus();
 
       //   construct response
       res.json({ analytics, timestamp: new Date().toISOString() });

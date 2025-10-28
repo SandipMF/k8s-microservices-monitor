@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import { Router, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Job } from "@microservices/shared-database";
+import { jobRepository, isValidJobType, IJob } from "@microservices/shared-database";
 import { REDIS_HOST, REDIS_PORT } from "../config/env.config";
 
 const router = Router();
@@ -25,15 +25,19 @@ router.post("/submit", async (req: Request, res: Response): Promise<void> => {
     const jobType = req.body.type;
 
     // Validate job type
-    if (!["prime", "bcrypt", "sort"].includes(jobType)) {
+    if (!isValidJobType(jobType)) {
       res
         .status(400)
-        .json({ error: "Invalid job type. Must be: prime, bcrypt, or sort" });
+        .json({ error: "Invalid job type. Must be one of: prime, bcrypt, or sort" });
       return;
     }
 
-    // Create job in MongoDB
-    const job = await Job.create({ jobId, type: jobType, status: "queued" });
+    // Create job in MongoDB using repository
+    const job = await jobRepository.create({
+      jobId,
+      type: jobType,
+      status: "queued",
+    });
 
     // Add job to Redis queue
     await jobQueue.add(
@@ -74,8 +78,8 @@ router.get(
       // Find job by jobId
       const jobId = req.params.id;
 
-      // Find job in MongoDB
-      const job = await Job.findOne({ jobId });
+      // Find job in MongoDB using repository
+      const job = await jobRepository.findById(jobId);
 
       // If job not found, return 404
       if (!job) {
@@ -111,15 +115,15 @@ router.get("/jobs", async (req: Request, res: Response): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 10;
     const status = req.query.status as string;
 
-    const query = status ? { status } : {};
-
-    // Fetch jobs from MongoDB with pagination
-    const jobs = await Job.find(query)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .skip((page - 1) * limit);
-
-    const total = await Job.countDocuments(query);
+    // Fetch jobs using repository with pagination
+    const { jobs, total } = await jobRepository.find(
+      status ? { status: status as any } : {},
+      {
+        page,
+        limit,
+        sort: { createdAt: -1 },
+      }
+    );
 
     // Return jobs with pagination info
     res.json({
