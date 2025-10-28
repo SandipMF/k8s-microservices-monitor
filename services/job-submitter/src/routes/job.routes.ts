@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import { Router, Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { Job } from "../models/Job.model";
+import { Job } from "@microservices/shared-database";
 import { REDIS_HOST, REDIS_PORT } from "../config/env.config";
 
 const router = Router();

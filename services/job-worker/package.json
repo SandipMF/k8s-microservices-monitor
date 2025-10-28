@@ -7,6 +7,7 @@
     "dev": "tsx watch --env-file=.env src/worker.ts"
   },
   "dependencies": {
+    "@microservices/shared-database": "file:../../shared/database",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.12.0",
     "dotenv": "^16.6.1",

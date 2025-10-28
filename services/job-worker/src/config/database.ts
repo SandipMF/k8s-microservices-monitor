@@ -1,14 +1,16 @@
-// Same as job-submitter
-import mongoose from "mongoose";
+import { databaseManager, DatabaseConfig } from "@microservices/shared-database";
 import { MONGODB_URI } from "./env.config";
+
+const dbConfig: DatabaseConfig = {
+  uri: MONGODB_URI,
+};
 
 // Function to connect to MongoDB
 export const connectDatabase = async (): Promise<void> => {
   try {
-    await mongoose.connect(MONGODB_URI);
-    console.log("Connected to MongoDB");
+    await databaseManager.connect(dbConfig);
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    console.error("Failed to connect to database:", error);
     process.exit(1);
   }
 };

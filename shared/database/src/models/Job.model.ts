@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 
-// Define the Job interface
+// Job interface
 export interface IJob extends Document {
   jobId: string;
   type: "prime" | "bcrypt" | "sort";
@@ -13,28 +13,47 @@ export interface IJob extends Document {
   completedAt?: Date;
 }
 
-// Define the Job schema
+// Job schema
 const JobSchema = new Schema<IJob>(
   {
-    jobId: { type: String, required: true, unique: true, index: true },
-    type: { type: String, enum: ["prime", "bcrypt", "sort"], required: true },
+    jobId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    type: {
+      type: String,
+      enum: ["prime", "bcrypt", "sort"],
+      required: true,
+    },
     status: {
       type: String,
       enum: ["queued", "processing", "completed", "failed"],
       default: "queued",
       index: true,
     },
-    result: { type: Schema.Types.Mixed },
-    processingTime: { type: Number },
-    error: { type: String },
-    completedAt: { type: Date },
+    result: {
+      type: Schema.Types.Mixed,
+    },
+    processingTime: {
+      type: Number,
+    },
+    error: {
+      type: String,
+    },
+    completedAt: {
+      type: Date,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-// Create indexes for efficient querying
+// Create indexes for better query performance
 JobSchema.index({ createdAt: -1 });
 JobSchema.index({ status: 1, createdAt: -1 });
 
-// Export the Job model
+// Job model
 export const Job: Model<IJob> = mongoose.model<IJob>("Job", JobSchema);

@@ -1,7 +1,7 @@
 import { Queue } from "bullmq";
 import express, { Application, Request, Response } from "express";
 import { Gauge, register } from "prom-client";
-import { Job } from "./models/Job.model";
+import { Job } from "@microservices/shared-database";
 import statsRoutes from "./routes/stats.routes";
 import { connectDatabase } from "./config/database";
 import { PORT, REDIS_HOST, REDIS_PORT } from "./config/env.config";

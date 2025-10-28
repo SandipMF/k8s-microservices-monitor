@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { Job as BullJob } from "bullmq";
-import { Job } from "../models/Job.model";
+import { Job } from "@microservices/shared-database";
 
 export interface JobData {
   jobId: string;
