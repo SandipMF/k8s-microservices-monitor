@@ -33,7 +33,8 @@ spec:
               mountPath: /data/db
       volumes:
         - name: mongodb-storage
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -47,3 +48,16 @@ spec:
       targetPort: 27017
   selector:
     app: mongodb
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: microservices-monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard

@@ -291,7 +291,8 @@ kubectl exec -it deployment/mongodb -n microservices-monitoring -- mongosh jobs_
 ### Check Redis Queue
 kubectl exec -it deployment/redis -n microservices-monitoring -- redis-cli
 
-LLEN bull:jobs:wait LLEN bull:jobs:active
+LLEN bull:jobs:wait
+LLEN bull:jobs:active
 
 
 ### Reset Everything
